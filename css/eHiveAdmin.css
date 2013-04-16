@@ -1,0 +1,130 @@
+/*
+	Copyright (C) 2012 Vernon Systems Limited
+
+	This program is free software; you can redistribute it and/or
+	modify it under the terms of the GNU General Public License
+	as published by the Free Software Foundation; either version 2
+	of the License, or (at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+	
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
+
+div#icon-options-ehive {
+	background-image: url('./images/eHiveOptions.ico');
+	background-repeat: no-repeat;
+}
+
+table.form-table {
+	width: auto;
+	margin-left: 20px;
+}
+
+.form-table td {
+	padding-top: 0;
+	vertical-align: middle;
+}
+
+.form-table tr th {
+	display: hidden;
+	padding:0;
+	margin:0;
+	clear: both;
+	padding-top: 5px;
+}
+
+div.field-label, 
+div.label-label, 
+div.enabled-label,
+div.result-view-left-label,
+div.result-view-middle-label,
+div.result-view-right-label {
+	padding-bottom: 10px;
+	font-size: 13px;
+	font-weight: bold;
+	float: left;
+}
+
+div.field-label,
+div.result-view-left-label {
+	width: 210px;
+	margin-left: 20px;
+}
+
+div.label-label {
+	width: 318px;
+}
+
+div.enabled-label {
+	width: 33px;
+}
+
+div.result-view-left-label {
+	width: 208px;
+	margin-left: 20px;
+}
+
+div.result-view-middle-label {
+	width: 72px;
+}
+
+div.result-view-right-label {
+	width: 33px;
+}
+
+#results_view_lightbox_enabled_default,
+#results_view_list_enabled_default {
+	margin-left: 40px;
+}
+
+
+.ehive_page_ehive_search h3, 
+.toplevel_page_ehive_access h3,
+.ehive_page_ehive_object_comments h3,
+.ehive_page_ehive_account h3,
+.ehive_page_ehive_object_details h3,
+.ehive_page_ehive_objects_image_grid h3,
+.ehive_page_ehive_objects_tag_cloud h3 {
+	margin-top: 20px;
+	padding: 10px 0 10px 10px;
+	background-color: #ddd;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	border-radius:10px;
+}
+
+div.ehive-options-demo-image {
+	height:auto;
+	width:auto;
+	float:right;
+	margin-top: 3%;
+	margin-bottom: -20%;
+	margin-right: 40%;
+}
+
+div.ehive-options-demo-image.list-view {
+	margin-top: 2%;
+	margin-right: 30%;
+}
+
+div.ehive-options-demo-image.lightbox-view {
+	margin-top: 0;
+}
+
+div.ehive-options-demo-image.lightbox-view.both-ehive-views-enabled {
+	margin-right: 10%;
+}
+
+div.ehive-options-demo-image.account-detail-item {
+	margin-top: 1%;
+}
+
+div.ehive-options-demo-image.object-detail-item {
+	margin-top: 0;
+}

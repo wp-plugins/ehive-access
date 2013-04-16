@@ -42,10 +42,10 @@ if (!class_exists('EHiveAccess')) {
 		 */
 		function ehive_access_admin_options_init(){
 			
-			wp_register_style($handle = 'eHiveAdminCSS', $src = plugins_url('eHiveAdmin.css', '/eHiveAccess/css/eHiveAdmin.css'));
+			wp_register_style($handle = 'eHiveAdminCSS', $src = plugins_url('eHiveAdmin.css', '/ehive-access/css/eHiveAdmin.css'));
 			wp_enqueue_style('eHiveAdminCSS');
 			
-			wp_register_script($handle = 'options', $src = plugins_url('options.js', '/eHiveAccess/js/options.js'), $deps = array('jquery'), $ver = '1.0.0', false);
+			wp_register_script($handle = 'options', $src = plugins_url('options.js', '/ehive-access/js/options.js'), $deps = array('jquery'), $ver = '1.0.0', false);
 			wp_enqueue_script( 'options' );
 				
 			register_setting('ehive_access_options', 'ehive_access_options', array(&$this, 'plugin_options_validate') );
@@ -404,7 +404,7 @@ if (!class_exists('EHiveAccess')) {
 	
 	$eHiveAccess = new EHiveAccess();
 	
-	add_action('activate_eHiveAccess/EHiveAccess.php', array(&$eHiveAccess, 'activate'));
-	add_action('deactivate_eHiveAccess/EHiveAccess.php', array(&$eHiveAccess, 'deactivate'));
+	add_action('activate_ehive-access/EHiveAccess.php', array(&$eHiveAccess, 'activate'));
+	add_action('deactivate_ehive-access/EHiveAccess.php', array(&$eHiveAccess, 'deactivate'));
 }
 ?>

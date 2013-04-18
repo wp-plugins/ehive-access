@@ -1,0 +1,10 @@
+RELEASE-NOTES.txt
+
+EHiveApi.php 
+Version 2.0.1 
+
+
+CHANGES:
+* License.txt file added.
+
+* 

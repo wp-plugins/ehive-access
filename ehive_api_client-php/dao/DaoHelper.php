@@ -32,7 +32,7 @@ class DaoHelper {
 		}
 	}
 	
-	public static function getObjectsQueryString($query, $hasImages, $sort, $direction, $offset, $limit) {
+	public static function getObjectsQueryString($query, $hasImages, $sort, $direction, $offset, $limit, $content=null) {
 	
 		
 		$queryString = "";
@@ -96,6 +96,15 @@ class DaoHelper {
 			} else {
 				$queryString = $queryString.$l;
 			}			
+		}		
+		
+		if (!is_null($content)) {
+			$c = "content={$content}";
+			if(strlen($queryString) > 0) {
+				$queryString = $queryString."&".$c;
+			} else {
+				$queryString = $queryString.$c;
+			}
 		}		
 		
 		return $queryString;

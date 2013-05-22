@@ -14,6 +14,7 @@
 */
 require_once EHIVE_API_ROOT_DIR.'/domain/objectrecords/FieldSet.php';
 require_once EHIVE_API_ROOT_DIR.'/domain/objectrecords/MediaSet.php';
+require_once EHIVE_API_ROOT_DIR.'/domain/accounts/Account.php';
 
 class ObjectRecord {
 
@@ -29,6 +30,7 @@ class ObjectRecord {
 	public $searchScore = 0;
 	public $fieldSets = array();
 	public $mediaSets = array();
+	public $account;
 	
 	
 	public function __construct($json = null){
@@ -58,7 +60,10 @@ class ObjectRecord {
 					$this->mediaSets[$mediaSet->identifier] = $mediaSet;
 				}
 			}
-				
+			
+			if (isset($json->account)) {
+				$this->account = new Account($json->account);
+			}				
 		}
 	}
 		

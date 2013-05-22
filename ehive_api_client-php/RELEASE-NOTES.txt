@@ -5,6 +5,8 @@ Version 2.0.1
 
 
 CHANGES:
+* 2.0.1
 * License.txt file added.
-
-* 
+* Added content attribute to the getObjectRecordsInAccount method in the ObjectRecordsDao
+* Escaped space and quotes to ASCII for the query attributes content for the get method in transport.php 
+*

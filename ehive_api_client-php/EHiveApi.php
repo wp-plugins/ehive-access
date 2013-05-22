@@ -78,10 +78,10 @@ class EHiveApi {
 		return $objectRecordsCollection;
 	}
 	
-	public function getObjectRecordsInAccount( $accountId, $query, $hasImages=false, $sort, $direction, $offset=0, $limit=12 ) {
+	public function getObjectRecordsInAccount( $accountId, $query, $hasImages=false, $sort, $direction, $offset=0, $limit=12, $content="public" ) {
 		require_once EHIVE_API_ROOT_DIR.'/dao/objectrecords/ObjectRecordsDao.php';
 		$objectRecordsDao = new ObjectRecordsDao($this->transport);
-		$objectRecordsCollection = $objectRecordsDao->getObjectRecordsInAccount( $accountId, $query, $hasImages, $sort, $direction, $offset, $limit );
+		$objectRecordsCollection = $objectRecordsDao->getObjectRecordsInAccount( $accountId, $query, $hasImages, $sort, $direction, $offset, $limit, $content );
 		return $objectRecordsCollection;		
 	}
 	

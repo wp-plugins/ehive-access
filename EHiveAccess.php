@@ -4,7 +4,7 @@
 	Plugin URI: http://developers.ehive.com/wordpress-plugins/
 	Description: Base authentication and API access for eHive Wordpress plugins.
 	Author: Vernon Systems limited
-	Version: 2.1.1
+	Version: 2.1.2
 	Author URI: http://vernonsystems.com
 	License: GPL2+
 */
@@ -92,7 +92,8 @@ if (!class_exists('EHiveAccess')) {
 		function site_section_text_fn() {
 			add_settings_field('site_type', 'Site type', array(&$this, 'site_type_fn'), __FILE__, 'site_section');
 			add_settings_field('account_id', 'eHive account id', array(&$this, 'account_id_fn'), __FILE__, 'site_section');
-			add_settings_field('community_id', 'eHive community id', array(&$this, 'community_id_fn'), __FILE__, 'site_section');
+			add_settings_field('community_id', 'eHive community id', array(&$this, 'community_id_fn'), __FILE__, 'site_section');		
+			add_settings_field('private_record_search_enabled', 'Allow searching for private records', array(&$this, 'private_record_search_enabled_fn'), __FILE__, 'site_section');				
 		}
 		
 		function page_configuration_section_text_fn() {
@@ -144,6 +145,16 @@ if (!class_exists('EHiveAccess')) {
 			$options = get_option('ehive_access_options');
 			echo '<input class="small-text" id="community_id" name="ehive_access_options[community_id]" type="number" value="'.$options['community_id'].'" />';
 		}
+		
+		function private_record_search_enabled_fn() {
+			$options = get_option('ehive_access_options');
+			if(isset($options['private_record_search_enabled']) && $options['private_record_search_enabled'] == 'on') {
+				$checked = ' checked="checked" ';
+			}
+			echo "<input {$checked} id='private_record_search_enabled' name='ehive_access_options[private_record_search_enabled]' type='checkbox' />";
+			echo '<p>Private records will be included in search results. The object records in the search results will only include public fields, regardless of whether the records are flagged as public or private in eHive. This option is only valid when the site type is Account</p>';
+        }
+		
 		
 		/**************************************
 		 * PAGE CONFIGURATION OPTIONS SECTION *
@@ -303,6 +314,11 @@ if (!class_exists('EHiveAccess')) {
 			$options = get_option('ehive_access_options');
 			return $options[community_id];
 		}
+		
+		public function getSearchPrivateRecords() {
+			$options = get_option('ehive_access_options');
+			return $options['private_record_search_enabled'] == 'on' ? true : false;
+		}
 				
 		public function getAccountDetailsPageId(){
 			$options = get_option('ehive_access_options');
@@ -386,6 +402,7 @@ if (!class_exists('EHiveAccess')) {
 						 "client_secret"=>"",
 						 "oauth_token"=>"", 
 						 "tracking_id"=>"",
+						 "private_record_search_enabled"=>"",
 						 "ehive_api_error_notification_enabled" => '',
 						 "ehive_api_error_message" => $defaultMessage );
 		

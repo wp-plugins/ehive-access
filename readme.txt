@@ -4,7 +4,7 @@ Donate link:http://ehive.com/what_is_ehive
 Tags: ehive, collection, museum, archive, history
 Requires at least: 3.3.1
 Tested up to: 3.5.1
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPL2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,10 +74,18 @@ There are three ways to install a plugin:
 4. Click the "Activate plugin" link below the plugin's name
 
 == Changelog ==
+= 2.1.2 =
+* Added option to search the private index for a Site type configured as Account.
+* Upgraded to ehive_api_client-php lib 2.0.1
+
 = 2.1.1 =
 * First stable release of the eHive Access plugin. 
 
 == Upgrade Notice ==
+= 2.1.2 =
+* The eHive API library has been updated to allow searching for any objects in an account that is is linked to the configured 
+* authentication keys. This is required to support changes to the eHive Access and eHive Search plugins.
+
 = 2.1.1 =
 This is the first stable release of the eHive Access plugin.
 

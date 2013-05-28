@@ -110,10 +110,10 @@ class EHiveApi {
 		return $interestingObjectRecords;		
 	}
 	
-	public function getInterestingObjectRecordsInAccount($accountId, $catalogueType="", $hasImages=false, $offset=0, $limit=12){
+	public function getInterestingObjectRecordsInAccount($accountId, $catalogueType="", $hasImages=false, $offset=0, $limit=12, $content="public"){
 		require_once EHIVE_API_ROOT_DIR.'/dao/interestingobjectrecords/InterestingObjectRecordsDao.php';
 		$interestingObjectRecordsDao = new InterestingObjectRecordsDao($this->transport);
-		$interestingObjectRecords = $interestingObjectRecordsDao->getInterestingObjectRecordsInAccount($accountId, $catalogueType, $hasImages, $offset, $limit);
+		$interestingObjectRecords = $interestingObjectRecordsDao->getInterestingObjectRecordsInAccount($accountId, $catalogueType, $hasImages, $offset, $limit, $content);
 		return $interestingObjectRecords;
 	}
 	
@@ -142,10 +142,10 @@ class EHiveApi {
 		return $popularObjectRecords;
 	}
 	
-	public function getPopularObjectRecordsInAccount($accountId, $catalogueType="", $hasImages=false, $offset=0, $limit=12){
+	public function getPopularObjectRecordsInAccount($accountId, $catalogueType="", $hasImages=false, $offset=0, $limit=12, $content="public"){
 		require_once EHIVE_API_ROOT_DIR.'/dao/popularobjectrecords/PopularObjectRecordsDao.php';
 		$popularObjectRecordsDao = new PopularObjectRecordsDao($this->transport);
-		$popularObjectRecords = $popularObjectRecordsDao->getPopularObjectRecordsInAccount($accountId, $catalogueType, $hasImages, $offset, $limit);
+		$popularObjectRecords = $popularObjectRecordsDao->getPopularObjectRecordsInAccount($accountId, $catalogueType, $hasImages, $offset, $limit, $content);
 		return $popularObjectRecords;
 	}
 	
@@ -174,10 +174,10 @@ class EHiveApi {
 		return $recentObjectRecords;
 	}
 	
-	public function getRecentObjectRecordsInAccount($accountId, $catalogueType="", $hasImages=false, $offset=0, $limit=12){
+	public function getRecentObjectRecordsInAccount($accountId, $catalogueType="", $hasImages=false, $offset=0, $limit=12, $content="public"){
 		require_once EHIVE_API_ROOT_DIR.'/dao/recentobjectrecords/RecentObjectRecordsDao.php';
 		$recentObjectRecordsDao = new RecentObjectRecordsDao($this->transport);
-		$recentObjectRecords = $recentObjectRecordsDao->getRecentObjectRecordsInAccount($accountId, $catalogueType, $hasImages, $offset, $limit);
+		$recentObjectRecords = $recentObjectRecordsDao->getRecentObjectRecordsInAccount($accountId, $catalogueType, $hasImages, $offset, $limit, $content);
 		return $recentObjectRecords;
 	}
 	

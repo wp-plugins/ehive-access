@@ -41,7 +41,7 @@ class ObjectRecordsDao {
 		$path = VERSION_ID . "/accounts/{$accountId}/objectrecords";
 		$queryString = DaoHelper::getObjectsQueryString($query, $hasImages, $sort, $direction, $offset, $limit, $content);
 		
-		if ($content == "any" | $content == "private") {
+		if ($content == "any" || $content == "private") {
 			$requiresCredentials = true;
 		} else {
 			$requiresCredentials = false;

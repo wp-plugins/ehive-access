@@ -30,12 +30,20 @@ class PopularObjectRecordsDao {
 		return new ObjectRecordsCollection($json);
 	}
 	
-	public function getPopularObjectRecordsInAccount( $accountId, $catalogueType, $hasImages, $offset, $limit ) {
+	public function getPopularObjectRecordsInAccount( $accountId, $catalogueType, $hasImages, $offset, $limit, $content ) {
 		require_once EHIVE_API_ROOT_DIR.'/domain/objectrecords/ObjectRecordsCollection.php';
 		$path = VERSION_ID . "/accounts/{$accountId}/objectrecords/popular";
 		$path = DaoHelper::urlWithCatalogueType($path, $catalogueType);
-		$queryString = DaoHelper::getObjectsQueryString(null, $hasImages, null, null, $offset, $limit);
-		$json = $this->transport->get( $path, $queryString );
+		
+		$queryString = DaoHelper::getObjectsQueryString(null, $hasImages, null, null, $offset, $limit, $content);
+		
+		if ($content == "any" | $content == "private") {
+			$requiresCredentials = true;
+		} else {
+			$requiresCredentials = false;
+		}
+		
+		$json = $this->transport->get( $path, $queryString, $requiresCredentials );
 		return new ObjectRecordsCollection($json);
 	}
 	

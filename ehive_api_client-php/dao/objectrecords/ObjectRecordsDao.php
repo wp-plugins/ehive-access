@@ -39,15 +39,8 @@ class ObjectRecordsDao {
 	public function getObjectRecordsInAccount( $accountId, $query, $hasImages, $sort, $direction, $offset, $limit, $content ) {
 		require_once EHIVE_API_ROOT_DIR.'/domain/objectrecords/ObjectRecordsCollection.php';
 		$path = VERSION_ID . "/accounts/{$accountId}/objectrecords";
-		$queryString = DaoHelper::getObjectsQueryString($query, $hasImages, $sort, $direction, $offset, $limit, $content);
-		
-		if ($content == "any" || $content == "private") {
-			$requiresCredentials = true;
-		} else {
-			$requiresCredentials = false;
-		}
-		$json = $this->transport->get( $path, $queryString, $requiresCredentials );
-		
+		$queryString = DaoHelper::getObjectsQueryString($query, $hasImages, $sort, $direction, $offset, $limit, $content);		
+		$json = $this->transport->get( $path, $queryString );		
 		return new ObjectRecordsCollection($json);
 	}
 	

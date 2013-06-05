@@ -1,10 +1,13 @@
 RELEASE-NOTES.txt
 
 EHiveApi.php 
-Version 2.0.1 
+Version 2.0.3 
 
 
 CHANGES:
+* 2.0.3
+* Authenticate against the eHive API using credentials or tracking id base on constructor parameters.
+
 * 2.0.2
 * Allow public, private and any content for interesting, popular and recent searches.
 
@@ -12,4 +15,3 @@ CHANGES:
 * License.txt file added.
 * Added content attribute to the getObjectRecordsInAccount method in the ObjectRecordsDao
 * Escaped space and quotes to ASCII for the query attributes content for the get method in transport.php 
-*

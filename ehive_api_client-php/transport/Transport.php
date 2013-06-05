@@ -24,6 +24,12 @@ class Transport {
 
 	const HTTPS_PROTOCOL = 'https://';
 	
+	const OAUTH_TOKEN_MISSING = 'OAuth Token is missing after the server said it has vended it. This is a fatal error and should be reported at http://forum.ehive.com.';
+	const RESOURCE_NOT_FOUND = 'Resource Not Found. Please check that your request URL is valid.';
+	const EHIVE_DOWN = 'eHive is currently down for a short period of maintenance. HTTP response code: 503';
+	const UNEXPECTED_ERROR = 'An unexpected error has occured while trying to access the eHive API. HTTP response code: ';
+	
+	
 	private $apiUrl;
 	private $clientId;
 	private $clientSecret;
@@ -33,14 +39,24 @@ class Transport {
 	private $oauthTokenCallback;
 	
 	private $retryAttempts = 0;
+	
+	private $apiAccessByCredentials = false;
+	
 
 	public function __construct($clientId='', $clientSecret='', $trackingId='', $oauthToken='', $oauthTokenCallback=null) {
+		
 		$this->apiUrl = EHiveConstants::API_URL;
 		$this->clientId = $clientId;
 		$this->clientSecret = $clientSecret;
 		$this->trackingId = $trackingId;
 		$this->oauthToken = $oauthToken;
 		$this->oauthTokenCallback = $oauthTokenCallback;
+				
+		if ( (is_null($clientId) == false) && (is_null($clientSecret) == false) ) {
+			$this->apiAccessByCredentials = true;	
+		} else {
+			$this->apiAccessByCredentials = false;
+		}		
 	}
 	
 	public function setClientId($clientId) { $this->clientId = $clientId; }
@@ -50,7 +66,7 @@ class Transport {
 	public function setCredentialsCallback($credentialsCallback) { $this->credentialsCallback = $credentialsCallback; }
 	public function setApiUrl($apiUrl) { $this->apiUrl = $apiUrl; }	
 
-	public function get($path, $queryString='', $requiresCredentials=false) {
+	public function get( $path, $queryString='' ) {
 
 		$ch = curl_init();		
 
@@ -70,17 +86,13 @@ class Transport {
 		
 		$headers[] = 'Content-Type: application/json';
 		
-		if ($requiresCredentials) {
+		if ( $this->apiAccessByCredentials ) {
 			$headers[] = 'Authorization: Basic ' . $oauthCredentials->oauthToken;
 			$headers[] = 'Client-Id: ' . $oauthCredentials->clientId;
 			$headers[] = 'Grant-Type: ' . EHiveConstants::GRANT_TYPE_AUTHORIZATION_CODE;
 		}
 		
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-		//
-		// Ask cURL to return the contents in a variable instead of simply echoing them to the browser.
-		//
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 				
 		$response = curl_exec ($ch);
@@ -96,14 +108,17 @@ class Transport {
 			case 401:
 				curl_close ($ch);
 				
-				if ($requiresCredentials && $this->retryAttempts < 3) {
+				if ( $this->apiAccessByCredentials && $this->retryAttempts < 3) {
 					
 					$oauthCredentials = $this->getAuthenticated();
 			
-					if (is_null($oauthCredentials->oauthToken)) throw new EHiveApiException('OAuth Token is missing after the server said it has vended it. This is a fatal error and should be reported at http://forum.ehive.com.');
+					if (is_null($oauthCredentials->oauthToken)) {
+						throw new EHiveApiException( self::OAUTH_TOKEN_MISSING );
+					}
 						
 					$this->retryAttempts = $this->retryAttempts + 1;
-					$json = $this->get($path, $queryString);
+					
+					$json = $this->get( $path, $queryString );
 					
 				} else {
 					$json = json_decode($response);
@@ -113,7 +128,7 @@ class Transport {
 						
 					$ehiveStatusMessage = new EHiveStatusMessage($json);
 						
-					throw new EHiveUnauthorizedException($ehiveStatusMessage->toString());
+					throw new EHiveUnauthorizedException( $ehiveStatusMessage->toString() );
 				}
 				break;
 				
@@ -130,7 +145,7 @@ class Transport {
 				
 			case 404:
 				curl_close ($ch);
-				throw new EHiveNotFoundException("Resource Not Found. Please check that your request URL is valid.");
+				throw new EHiveNotFoundException( self::RESOURCE_NOT_FOUND );
 				break;
 				
 			case 500:
@@ -146,15 +161,14 @@ class Transport {
 				
 			case 503:
 				curl_close ($ch);
-				throw new EHiveApiException("eHive is currently down for a short period of maintenance. HTTP response code: $httpResponseCode");
+				throw new EHiveApiException( self::EHIVE_DOWN );
 				break;
 				
 			default:
 				curl_close ($ch);
-				throw new EHiveApiException("An unexpected error has occured while trying to access the API. HTTP response code: $httpResponseCode");
+				throw new EHiveApiException( self::UNEXPECTED_ERROR + $httpResponseCode );
 				break;
 		}
-
 		return $json;
 	}
 
@@ -186,15 +200,8 @@ class Transport {
 						);
 
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-		
-		/**
-		 * Ask cURL to return the contents in a variable instead of simply echoing them to the browser.
-		 */
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-		/**
-		 * Execute the cURL session
-		 */
 		$response = curl_exec ($ch);
 
 		$httpResponseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -204,16 +211,20 @@ class Transport {
 				$json = json_decode($response);
 				curl_close ($ch);
 				break;
+
 			case 401:
 				curl_close ($ch);
 					
 				if ($this->retryAttempts < 3) {
 					$oauthCredentials = $this->getAuthenticated();
 			
-					if (is_null($oauthCredentials->oauthToken)) throw new EHiveApiException('OAuth Token is missing after the server said it has vended it. This is a fatal error and should be reported at http://forum.ehive.com.');
+					if (is_null($oauthCredentials->oauthToken)) {
+						throw new EHiveApiException( self::OAUTH_TOKEN_MISSING );
+					}
 						
 					$this->retryAttempts = $this->retryAttempts + 1;
 					$json = $this->post($path, $content);
+					
 				} else {
 					$json = json_decode($response);
 					curl_close ($ch);
@@ -222,9 +233,10 @@ class Transport {
 						
 					$ehiveStatusMessage = new EHiveStatusMessage($json);
 						
-					throw new EHiveUnauthorizedException($ehiveStatusMessage->toString());
+					throw new EHiveUnauthorizedException( $ehiveStatusMessage->toString() );
 				}
 				break;
+			
 			case 403:
 				$json = json_decode($response);
 				curl_close ($ch);
@@ -235,10 +247,12 @@ class Transport {
 			
 				throw new EHiveForbiddenException($ehiveStatusMessage->toString());
 				break;
+			
 			case 404:
 				curl_close ($ch);
-				throw new EHiveNotFoundException("Resource Not Found. Please check that your request URL is valid.");
+				throw new EHiveNotFoundException( self::RESOURCE_NOT_FOUND );
 				break;
+			
 			case 500:
 				$json = json_decode($response);
 				curl_close ($ch);
@@ -247,24 +261,23 @@ class Transport {
 
 				$ehiveStatusMessage = new EHiveStatusMessage($json);
 				
-				throw new EHiveFatalServerException($ehiveStatusMessage->toString());
+				throw new EHiveFatalServerException( $ehiveStatusMessage->toString() );
 				break;
+			
 			case 503:
-				throw new EHiveApiException("eHive is currently down for a short period of maintenance. HTTP response code: $httpResponseCode");
+				throw new EHiveApiException( self::EHIVE_DOWN );
 				break;
+			
 			default:
 				curl_close ($ch);
-				throw new EHiveApiException("An unexpected error has occured while trying to access the API. HTTP response code: $httpResponseCode");
+				throw new EHiveApiException(  self::UNEXPECTED_ERROR + $httpResponseCode );
 				break;
-		}
-			
+		}			
 		return $json;
 	}
 
 	public function delete($path, $queryString='') {
-		/**
-		 * Initialize the cURL session
-		 */
+
 		$ch = curl_init();
 
 		$uri = $this->apiUrl . $path;
@@ -285,14 +298,8 @@ class Transport {
 						);
 		
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-		/**
-		 * Ask cURL to return the contents in a variable instead of simply echoing them to the browser.
-		 */
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-		/**
-		 * Execute the cURL session
-		 */
 		$response = curl_exec ($ch);
 
 		$httpResponseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -302,13 +309,16 @@ class Transport {
 				$json = json_decode($response);
 				curl_close ($ch);
 				break;
+
 			case 401:
 				curl_close ($ch);
 					
 				if ($this->retryAttempts < 3) {
 					$oauthCredentials = $this->getAuthenticated();
 			
-					if (is_null($oauthCredentials->oauthToken)) throw new EHiveApiException('OAuth Token is missing after the server said it has vended it. This is a fatal error and should be reported at http://forum.ehive.com.');
+					if (is_null($oauthCredentials->oauthToken)) {
+						throw new EHiveApiException( self::OAUTH_TOKEN_MISSING );
+					}
 						
 					$this->retryAttempts = $this->retryAttempts + 1;
 					$json = $this->delete($path, $queryString);
@@ -320,9 +330,10 @@ class Transport {
 						
 					$ehiveStatusMessage = new EHiveStatusMessage($json);
 						
-					throw new EHiveUnauthorizedException($ehiveStatusMessage->toString());
+					throw new EHiveUnauthorizedException( $ehiveStatusMessage->toString() );
 				}
 				break;
+			
 			case 403:
 				$json = json_decode($response);
 				curl_close ($ch);
@@ -331,12 +342,14 @@ class Transport {
 			
 				$ehiveStatusMessage = new EHiveStatusMessage($json);
 			
-				throw new EHiveForbiddenException($ehiveStatusMessage->toString());
+				throw new EHiveForbiddenException( $ehiveStatusMessage->toString() );
 				break;
+			
 			case 404:
 				curl_close ($ch);
-				throw new EHiveNotFoundException("Resource Not Found. Please check that your request URL is valid.");
+				throw new EHiveNotFoundException( self::RESOURCE_NOT_FOUND );
 				break;
+			
 			case 500:
 				$json = json_decode($response);
 				curl_close ($ch);
@@ -345,22 +358,21 @@ class Transport {
 
 				$ehiveStatusMessage = new EHiveStatusMessage($json);
 				
-				throw new EHiveFatalServerException($ehiveStatusMessage->toString());
+				throw new EHiveFatalServerException( $ehiveStatusMessage->toString() );
 				break;
+
 			case 503:
 				curl_close ($ch);
-				throw new EHiveApiException("eHive is currently down for a short period of maintenance. HTTP response code: $httpResponseCode");
+				throw new EHiveApiException( self::EHIVE_DOWN );
 				break;
+			
 			default:
 				curl_close ($ch);
-				throw new EHiveApiException("An unexpected error has occured while trying to access the API. HTTP response code: $httpResponseCode");
+				throw new EHiveApiException(  self::UNEXPECTED_ERROR + $httpResponseCode );
 				break;
-		}
-		
+		}		
 		return $json;
 	}
-
-	
 	
 	private function getAuthenticated() {	
 				
@@ -385,10 +397,6 @@ class Transport {
 						);
 		
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-		
-		//
-		// Ask cURL to return the contents in a variable instead of simply echoing them to the browser.
-		//
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
 		$response = curl_exec ($ch);
@@ -422,14 +430,8 @@ class Transport {
 														str_replace("\r", "", $headers["Grant-Type"])
 													));
 				
-				/**
-				 * Ask cURL to return the contents in a variable instead of simply echoing them to the browser.
-				*/
 				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-				
-				/**
-				 * Execute the cURL session
-				*/
+
 				$response = curl_exec ($ch);
 				
 				$httpResponseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -456,7 +458,7 @@ class Transport {
 					
 						$ehiveStatusMessage = new EHiveStatusMessage($json);
 					
-						throw new EHiveUnauthorizedException($ehiveStatusMessage->toString());
+						throw new EHiveUnauthorizedException( $ehiveStatusMessage->toString() );
 						break;
 						
 					case 403:
@@ -472,7 +474,7 @@ class Transport {
 						
 					case 404:
 						curl_close ($ch);
-						throw new EHiveNotFoundException("Resource Not Found. Please check that your request URL is valid.");
+						throw new EHiveNotFoundException( self::RESOURCE_NOT_FOUND );
 						break;
 						
 					case 500:
@@ -483,17 +485,17 @@ class Transport {
 				
 						$ehiveStatusMessage = new EHiveStatusMessage($json);
 				
-						throw new EHiveFatalServerException($ehiveStatusMessage->toString());
+						throw new EHiveFatalServerException( $ehiveStatusMessage->toString() );
 						break;
 						
 					case 503:
 						curl_close ($ch);
-						throw new EHiveApiException("eHive is currently down for a short period of maintenance. HTTP response code: $httpResponseCode");
+						throw new EHiveApiException( self::EHIVE_DOWN );
 						break;
 						
 					default:
 						curl_close ($ch);
-						throw new EHiveApiException("An unexpected error has occured while trying to access the API. HTTP response code: $httpResponseCode");
+						throw new EHiveApiException(  self::UNEXPECTED_ERROR + $httpResponseCode );
 						break;
 				}
 				
@@ -518,9 +520,10 @@ class Transport {
 				$ehiveStatusMessage = new EHiveStatusMessage($json);
 			
 				throw new EHiveForbiddenException($ehiveStatusMessage->toString());
+			
 			case 404:
 				curl_close ($ch);
-				throw new EHiveNotFoundException("Resource Not Found. Please check that your request URL is valid.");
+				throw new EHiveNotFoundException( self::RESOURCE_NOT_FOUND );
 				break;
 				
 			case 500:
@@ -535,12 +538,11 @@ class Transport {
 				break;
 				
 			case 503:
-				throw new EHiveApiException("eHive is currently down for a short period of maintenance. HTTP response code: $httpResponseCode");
+				throw new EHiveApiException( self::EHIVE_DOWN );
 				break;
-				
-				
+								
 			default:
-				throw new EHiveApiException("An unexpected error has occured while trying to access the API. HTTP response code: $httpResponseCode");
+				throw new EHiveApiException(  self::UNEXPECTED_ERROR + $httpResponseCode );
 				break;
 		}
 	}

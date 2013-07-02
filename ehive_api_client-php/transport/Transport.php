@@ -37,13 +37,18 @@ class Transport {
 	
 	private $oauthToken;
 	private $oauthTokenCallback;
+		
+	private $memcachedServers;	
+	private $memcacheExpiry;
+	private $memcache;
+		
 	
 	private $retryAttempts = 0;
 	
 	private $apiAccessByCredentials = false;
 	
 
-	public function __construct($clientId='', $clientSecret='', $trackingId='', $oauthToken='', $oauthTokenCallback=null) {
+	public function __construct($clientId='', $clientSecret='', $trackingId='', $oauthToken='', $oauthTokenCallback=null, $memcachedServers=null, $memcacheExpiry=300) {
 		
 		$this->apiUrl = EHiveConstants::API_URL;
 		$this->clientId = $clientId;
@@ -51,7 +56,10 @@ class Transport {
 		$this->trackingId = $trackingId;
 		$this->oauthToken = $oauthToken;
 		$this->oauthTokenCallback = $oauthTokenCallback;
-				
+		
+		$this->memcachedServers = $memcachedServers;
+		$this->memcacheExpiry = $memcacheExpiry;
+		
 		if ( (is_null($clientId) == false) && (is_null($clientSecret) == false) ) {
 			$this->apiAccessByCredentials = true;	
 		} else {
@@ -66,8 +74,30 @@ class Transport {
 	public function setCredentialsCallback($credentialsCallback) { $this->credentialsCallback = $credentialsCallback; }
 	public function setApiUrl($apiUrl) { $this->apiUrl = $apiUrl; }	
 
-	public function get( $path, $queryString='' ) {
+	public function get( $path, $queryString='', $useCache=false ) {
 
+		// Look in the cache first.
+		if ( !is_null($this->memcachedServers) && $useCache === true) {			
+			$this->memcache = new Memcache();
+						
+			for ($r = 0; $r < count($this->memcachedServers); $r++) {	
+											
+				$hostport = explode(":", $this->memcachedServers[$r] );								
+				
+				$host = $hostport[0];
+				$port = intval( $hostport[1] );
+				
+				$this->memcache->addServer( $host, $port);			
+			}
+			
+			$cachedValue = $this->memcache->get( $this->mecacheKey($path,$queryString) );
+			if ( !$cachedValue === false ) {				
+				$this->memcache->close();
+				return $cachedValue;
+			}			
+		}		
+		
+		
 		$ch = curl_init();		
 
 		$qs = str_replace(" ", "%20", $queryString);
@@ -103,10 +133,18 @@ class Transport {
 			case 200:
 				$json = json_decode($response);
 				curl_close ($ch);
+				
+				// Add result to the cache then close.
+				if (!is_null($this->memcachedServers) && $useCache === true) {
+					$this->memcache->add( $this->mecacheKey($path,$queryString), $json, false, $this->memcacheExpiry);					
+					$this->memcache->close();
+				}	
+				return $json;
 				break;
 				
 			case 401:
 				curl_close ($ch);
+				if (!is_null($this->memcachedServers) && $useCache === true) $this->memcache->close();
 				
 				if ( $this->apiAccessByCredentials && $this->retryAttempts < 3) {
 					
@@ -118,7 +156,9 @@ class Transport {
 						
 					$this->retryAttempts = $this->retryAttempts + 1;
 					
-					$json = $this->get( $path, $queryString );
+					$json = $this->get( $path, $queryString, $useCache );
+					
+					return $json;
 					
 				} else {
 					$json = json_decode($response);
@@ -135,6 +175,7 @@ class Transport {
 			case 403:
 				$json = json_decode($response);
 				curl_close ($ch);
+				if (!is_null($this->memcachedServers) && $useCache === true) $this->memcache->close();
 			
 				require_once EHIVE_API_ROOT_DIR.'/exceptions/EHiveStatusMessage.php';
 			
@@ -145,15 +186,17 @@ class Transport {
 				
 			case 404:
 				curl_close ($ch);
+				if (!is_null($this->memcachedServers) && $useCache === true) $this->memcache->close();
+				
 				throw new EHiveNotFoundException( self::RESOURCE_NOT_FOUND );
 				break;
 				
 			case 500:
 				$json = json_decode($response);
 				curl_close ($ch);
-			
-				require_once EHIVE_API_ROOT_DIR.'/exceptions/EHiveStatusMessage.php';
-			
+				if (!is_null($this->memcachedServers) && $useCache === true) $this->memcache->close();
+							
+				require_once EHIVE_API_ROOT_DIR.'/exceptions/EHiveStatusMessage.php';			
 				$ehiveStatusMessage = new EHiveStatusMessage($json);
 			
 				throw new EHiveFatalServerException($ehiveStatusMessage->toString());
@@ -161,18 +204,21 @@ class Transport {
 				
 			case 503:
 				curl_close ($ch);
+				if (!is_null($this->memcachedServers) && $useCache === true) $this->memcache->close();
+				
 				throw new EHiveApiException( self::EHIVE_DOWN );
 				break;
 				
 			default:
 				curl_close ($ch);
+				if (!is_null($this->memcachedServers) && $useCache === true) $this->memcache->close();			
+				
 				throw new EHiveApiException( self::UNEXPECTED_ERROR + $httpResponseCode );
 				break;
-		}
-		return $json;
+		}		
 	}
 
-	public function post($path, $content) {
+	public function post($path, $content='') {
 
 		$ch = curl_init();
 
@@ -210,6 +256,15 @@ class Transport {
 			case 200:
 				$json = json_decode($response);
 				curl_close ($ch);
+				break;
+				
+			case 400:
+				$json = json_decode($response);
+				curl_close ($ch);
+					
+				require_once EHIVE_API_ROOT_DIR.'/exceptions/EHiveBadRequestException.php';
+			
+				throw new EHiveBadRequestException( $json );
 				break;
 
 			case 401:
@@ -276,6 +331,132 @@ class Transport {
 		return $json;
 	}
 
+	
+	public function put($path, $content='') {
+	
+		$ch = curl_init();
+	
+		$uri = $this->apiUrl . $path;
+	
+		$completeUrl = $this->createUrl($uri);
+	
+		$oauthCredentials = $this->getOauthCredentials();
+	
+		if ($this->retryAttempts == 0) {
+			$content = json_encode($content);
+		}
+	
+		curl_setopt($ch, CURLOPT_URL, $completeUrl);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $content);
+		
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+		//curl_setopt($ch, CURLOPT_PUT, 1);
+		
+		curl_setopt($ch, CURLOPT_HEADER, 0);
+		
+	
+		$headers = array(
+				'Content-Type: application/json',
+				'Content-Length:' . strlen($content),
+				'Authorization: Basic ' . $oauthCredentials->oauthToken,
+				'Client-Id: '. $oauthCredentials->clientId,
+				'Grant-Type: '. EHiveConstants::GRANT_TYPE_AUTHORIZATION_CODE
+		);
+	
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	
+		$response = curl_exec ($ch);
+	
+		$httpResponseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	
+		switch ($httpResponseCode) {
+			case 200:
+				$json = json_decode($response);
+				curl_close ($ch);
+				break;
+								
+			case 400:				
+				
+				require_once EHIVE_API_ROOT_DIR.'/domain/BadRequestMessage.php';
+				
+				$json = json_decode($response);				
+				$badRequestMessage = new BadRequestMessage($json);
+				
+				curl_close ($ch);
+			
+				require_once EHIVE_API_ROOT_DIR.'/exceptions/EHiveBadRequestException.php';								
+						
+				throw new EHiveBadRequestException( $badRequestMessage->requestMessage, $badRequestMessage->requestFields );
+				break;
+					
+			case 401:
+				curl_close ($ch);
+					
+				if ($this->retryAttempts < 3) {
+					$oauthCredentials = $this->getAuthenticated();
+						
+					if (is_null($oauthCredentials->oauthToken)) {
+						throw new EHiveApiException( self::OAUTH_TOKEN_MISSING );
+					}
+	
+					$this->retryAttempts = $this->retryAttempts + 1;
+					$json = $this->post($path, $content);
+						
+				} else {
+					$json = json_decode($response);
+					curl_close ($ch);
+	
+					require_once EHIVE_API_ROOT_DIR.'/exceptions/EHiveStatusMessage.php';
+	
+					$ehiveStatusMessage = new EHiveStatusMessage($json);
+	
+					throw new EHiveUnauthorizedException( $ehiveStatusMessage->toString() );
+				}
+				break;
+					
+			case 403:
+				$json = json_decode($response);
+				curl_close ($ch);
+					
+				require_once EHIVE_API_ROOT_DIR.'/exceptions/EHiveStatusMessage.php';
+					
+				$ehiveStatusMessage = new EHiveStatusMessage($json);
+					
+				throw new EHiveForbiddenException($ehiveStatusMessage->toString());
+				break;
+					
+			case 404:
+				curl_close ($ch);
+				throw new EHiveNotFoundException( self::RESOURCE_NOT_FOUND );
+				break;
+					
+			case 500:
+				$json = json_decode($response);
+				curl_close ($ch);
+	
+				require_once EHIVE_API_ROOT_DIR.'/exceptions/EHiveStatusMessage.php';
+	
+				$ehiveStatusMessage = new EHiveStatusMessage($json);
+	
+				throw new EHiveFatalServerException( $ehiveStatusMessage->toString() );
+				break;
+					
+			case 503:
+				throw new EHiveApiException( self::EHIVE_DOWN );
+				break;
+					
+			default:
+				curl_close ($ch);
+				throw new EHiveApiException(  self::UNEXPECTED_ERROR + $httpResponseCode );
+				break;
+		}
+		return $json;
+	}
+	
+	
+	
+	
 	public function delete($path, $queryString='') {
 
 		$ch = curl_init();
@@ -582,5 +763,10 @@ class Transport {
 
 		return $oauthCredentials;
 	}
+	
+	private function mecacheKey($path, $queryString) {		
+		return md5( $path.$queryString );
+	}
+	
 }
 ?>

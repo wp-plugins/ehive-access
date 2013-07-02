@@ -1,10 +1,13 @@
 RELEASE-NOTES.txt
 
 EHiveApi.php 
-Version 2.0.3 
+Version 2.1.0 
 
 
 CHANGES:
+* 2.1.0
+* Added caching of GET requests using PHP Memcache. 
+
 * 2.0.3
 * Authenticate against the eHive API using credentials or tracking id base on constructor parameters.
 

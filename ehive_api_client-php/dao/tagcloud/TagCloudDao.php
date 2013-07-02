@@ -25,7 +25,7 @@ class TagCloudDao {
 		require_once EHIVE_API_ROOT_DIR.'/domain/tagcloud/TagCloud.php';
 		$path = VERSION_ID . "/objectrecords/tagcloud";
 		$queryString = isset($limit) ? "limit={$limit}" : "";
-		$json = $this->transport->get($path, $queryString);
+		$json = $this->transport->get($path, $queryString, true );
 		$responseTagCloud = new TagCloud($json);
 		return $responseTagCloud;
 	}
@@ -34,7 +34,7 @@ class TagCloudDao {
 		require_once EHIVE_API_ROOT_DIR.'/domain/tagcloud/TagCloud.php';
 		$path = VERSION_ID . "/accounts/{$accountId}/objectrecords/tagcloud";
 		$queryString = isset($limit) ? "limit={$limit}" : "";
-		$json = $this->transport->get($path, $queryString);
+		$json = $this->transport->get($path, $queryString, true );
 		$responseTagCloud = new TagCloud($json);
 		return $responseTagCloud;
 	}
@@ -43,7 +43,7 @@ class TagCloudDao {
 		require_once EHIVE_API_ROOT_DIR.'/domain/tagcloud/TagCloud.php';
 		$path = VERSION_ID . "/communities/{$communityId}/objectrecords/tagcloud";
 		$queryString = isset($limit) ? "limit={$limit}" : "";
-		$json = $this->transport->get($path, $queryString);
+		$json = $this->transport->get($path, $queryString, true );
 		$responseTagCloud = new TagCloud($json);
 		return $responseTagCloud;
 	}

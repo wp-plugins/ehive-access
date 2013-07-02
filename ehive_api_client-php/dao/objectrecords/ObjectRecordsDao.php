@@ -32,7 +32,7 @@ class ObjectRecordsDao {
 		require_once EHIVE_API_ROOT_DIR.'/domain/objectrecords/ObjectRecordsCollection.php';
 		$path = VERSION_ID . "/objectrecords";
 		$queryString = DaoHelper::getObjectsQueryString($query, $hasImages, $sort, $direction, $offset, $limit);
-		$json = $this->transport->get( $path, $queryString );
+		$json = $this->transport->get( $path, $queryString, true );
 		return new ObjectRecordsCollection($json);		
 	}
 
@@ -40,7 +40,7 @@ class ObjectRecordsDao {
 		require_once EHIVE_API_ROOT_DIR.'/domain/objectrecords/ObjectRecordsCollection.php';
 		$path = VERSION_ID . "/accounts/{$accountId}/objectrecords";
 		$queryString = DaoHelper::getObjectsQueryString($query, $hasImages, $sort, $direction, $offset, $limit, $content);		
-		$json = $this->transport->get( $path, $queryString );		
+		$json = $this->transport->get( $path, $queryString, true );		
 		return new ObjectRecordsCollection($json);
 	}
 	
@@ -48,7 +48,7 @@ class ObjectRecordsDao {
 		require_once EHIVE_API_ROOT_DIR.'/domain/objectrecords/ObjectRecordsCollection.php';
 		$path = VERSION_ID . "/communities/{$communityId}/objectrecords";
 		$queryString = DaoHelper::getObjectsQueryString($query, $hasImages, $sort, $direction, $offset, $limit);
-		$json = $this->transport->get( $path, $queryString );
+		$json = $this->transport->get( $path, $queryString, true );
 		return new ObjectRecordsCollection($json);
 	}
 	
@@ -56,7 +56,7 @@ class ObjectRecordsDao {
 		require_once EHIVE_API_ROOT_DIR.'/domain/objectrecords/ObjectRecordsCollection.php';
 		$path = VERSION_ID . "/communities/{$communityId}/accounts/{$accountId}/objectrecords";
 		$queryString = DaoHelper::getObjectsQueryString($query, $hasImages, $sort, $direction, $offset, $limit);
-		$json = $this->transport->get( $path, $queryString );
+		$json = $this->transport->get( $path, $queryString, true );
 		return new ObjectRecordsCollection($json);
 	}
 		

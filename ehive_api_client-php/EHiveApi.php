@@ -23,8 +23,30 @@ class EHiveApi {
 	
 	protected $transport;
 	
-	public function __construct( $clientId=null, $clientSecret=null, $trackingId=null, $oauthToken=null, $oauthCredentialsCallback=null) {
-		$this->transport = new Transport($clientId, $clientSecret, $trackingId, $oauthToken, $oauthCredentialsCallback);
+	/**
+	 * String $clientId - eHive API key client Id
+	 * 
+	 * String $clientSecret - eHive API key client secret
+	 * 
+	 * String $trackingId - eHive API key tracking Id.
+	 * 
+	 * String $oauthToken - The OAuthToken vendered by a previous request API request.
+	 * 
+	 * function $oauthCredentialsCallback - A function that takes a single String parameter for a vendered OAauth Token.
+	 *    exmple:
+	 *      function oauthTokenCallback($oauthToken) {
+	 *         // persist the vendered oauthToken for reuse with the next instantiation of an EHiveApi class.
+	 *      }
+	 * 
+	 * array $memcacheServers - array of hosts and ports for Memcached services. When null memcache is disabled. 
+	 *    examples: 
+	 *      Memcached on the same server - array('localhost:11211') 
+	 *      Memcached distributed on two servers - array('192.168.1.4:11211', '192.168.1.5:11211')  
+	 * 
+	 * number $memcacheExpiry - cache expiry time in seconds.
+	 */
+	public function __construct( $clientId=null, $clientSecret=null, $trackingId=null, $oauthToken=null, $oauthTokenCallback=null, $memcacheServers=null, $memcacheExpiry=300) {
+		$this->transport = new Transport($clientId, $clientSecret, $trackingId, $oauthToken, $oauthTokenCallback, $memcacheServers, $memcacheExpiry);
 	}
 	
 	function getConfiguration() {
@@ -48,16 +70,16 @@ class EHiveApi {
 		$account = $accountsDao->getAccountInCommunity($communityId, $accountId);
 		return $account;
 	}
-	
-	
+
+
 	//
-	// Authentication
+	//	Get Communities
 	//
-	public function signin($ehiveId, $password) {
-		require_once EHIVE_API_ROOT_DIR.'/dao/authentication/AuthenticationDao.php';
-		$authenticationDao = new AuthenticationDao($this->transport);
-		$oAuthCredentials = $authenticationDao->signin($ehiveId, $password);
-		return $oAuthCredentials;
+	public function getCommunitiesModeratoredByAccount($accountId) {
+		require_once EHIVE_API_ROOT_DIR.'/dao/communities/CommunitiesDao.php';
+		$communitiesDao = new CommunitiesDao($this->transport);
+		$communitiesCollection = $communitiesDao->getCommunitiesModeratedByAccount($accountId);
+		return $communitiesCollection;
 	}
 	
 	

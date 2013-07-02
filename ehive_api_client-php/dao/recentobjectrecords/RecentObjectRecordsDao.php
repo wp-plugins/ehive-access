@@ -26,7 +26,7 @@ class RecentObjectRecordsDao {
 		$path = VERSION_ID . "/objectrecords/recent";
 		$path = DaoHelper::urlWithCatalogueType($path, $catalogueType);
 		$queryString = DaoHelper::getObjectsQueryString(null, $hasImages, null, null, $offset, $limit);		
-		$json = $this->transport->get( $path, $queryString );
+		$json = $this->transport->get( $path, $queryString, true );
 		return new ObjectRecordsCollection($json);
 	}
 	
@@ -35,7 +35,7 @@ class RecentObjectRecordsDao {
 		$path = VERSION_ID . "/accounts/{$accountId}/objectrecords/recent";
 		$path = DaoHelper::urlWithCatalogueType($path, $catalogueType);
 		$queryString = DaoHelper::getObjectsQueryString(null, $hasImages, null, null, $offset, $limit, $content);
-		$json = $this->transport->get( $path, $queryString );
+		$json = $this->transport->get( $path, $queryString, true  );
 		return new ObjectRecordsCollection($json);
 	}
 	
@@ -44,7 +44,7 @@ class RecentObjectRecordsDao {
 		$path = VERSION_ID . "/communities/{$communityId}/objectrecords/recent";
 		$path = DaoHelper::urlWithCatalogueType($path, $catalogueType);
 		$queryString = DaoHelper::getObjectsQueryString(null, $hasImages, null, null, $offset, $limit);
-		$json = $this->transport->get( $path, $queryString );
+		$json = $this->transport->get( $path, $queryString, true  );
 		return new ObjectRecordsCollection($json);
 	}
 	
@@ -53,7 +53,7 @@ class RecentObjectRecordsDao {
 		$path = VERSION_ID . "/communities/{$communityId}/accounts/{$accountId}/objectrecords/recent";
 		$path = DaoHelper::urlWithCatalogueType($path, $catalogueType);
 		$queryString = DaoHelper::getObjectsQueryString(null, $hasImages, null, null, $offset, $limit);
-		$json = $this->transport->get( $path, $queryString );
+		$json = $this->transport->get( $path, $queryString, true  );
 		return new ObjectRecordsCollection($json);
 	}	
 }?>

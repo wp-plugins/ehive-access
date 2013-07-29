@@ -3,8 +3,8 @@ Contributors: vernonsystems
 Donate link:http://ehive.com/what_is_ehive
 Tags: ehive, collection, museum, archive, history
 Requires at least: 3.3.1
-Tested up to: 3.5.1
-Stable tag: 2.2.0
+Tested up to: 3.5.2
+Stable tag: 2.2.1
 License: GPL2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,6 +74,9 @@ There are three ways to install a plugin:
 4. Click the "Activate plugin" link below the plugin's name
 
 == Changelog ==
+= 2.2.1 = 
+* Bug fix, harded coded the options value in the $oauthTokenCallback function line 383 of EHiveAccess.php so the plugin will work with PHP version 5.3.13 and newer. 
+
 = 2.2.0 =
 * Added caching for GET requests using PHP Memcache to improve page response times.
 * Added version control for plugin options. Defaulting of new options without changing existing options is now possible.
@@ -94,6 +97,9 @@ There are three ways to install a plugin:
 * First stable release of the eHive Access plugin. 
 
 == Upgrade Notice ==
+= 2.2.1 = 
+* Bug fix, harded coded the options value in the $oauthTokenCallback function line 383 of EHiveAccess.php so the plugin will work with PHP version 5.3.13 and newer. 
+
 = 2.2.0 =
 * Added caching for GET requests using PHP Memcache to improve page response times.
 * Added version control for plugin options. Defaulting of new options without changing existing options is now possible.

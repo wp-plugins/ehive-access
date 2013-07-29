@@ -4,7 +4,7 @@
 	Plugin URI: http://developers.ehive.com/wordpress-plugins/
 	Description: Base authentication and API access for eHive Wordpress plugins.
 	Author: Vernon Systems limited
-	Version: 2.2.0
+	Version: 2.2.1
 	Author URI: http://vernonsystems.com
 	License: GPL2+
 */
@@ -380,11 +380,11 @@ if (!class_exists('EHiveAccess')) {
 			//
 			$oauthTokenCallback = function($oauthToken) {
 			
-				$options = get_option(self::EHIVE_ACCESS_OPTIONS);
+				$options = get_option("ehive_access_options");
 			
 				$options['oauth_token'] = $oauthToken;
 			
-				update_option(self::EHIVE_ACCESS_OPTIONS, $options);								
+				update_option("ehive_access_options", $options);								
 			};
 				
 									

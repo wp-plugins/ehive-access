@@ -17,6 +17,7 @@ class AccountsDao {
 	private $transport;
  
 	public function __construct($trasport) {
+		require_once EHIVE_API_ROOT_DIR.'/dao/DaoHelper.php';
 		$this->transport = $trasport;
 	}
 
@@ -36,4 +37,19 @@ class AccountsDao {
 		return $responseAccount;
 	}
 	
+	public function getAccountsInEHive( $query, $sort, $direction, $offset, $limit ) {
+		require_once EHIVE_API_ROOT_DIR.'/domain/accounts/AccountsCollection.php';
+		$path = VERSION_ID . "/accounts";
+		$queryString = DaoHelper::getAccountsQueryString($query, $sort, $direction, $offset, $limit);
+		$json = $this->transport->get( $path, $queryString, true );
+		return new AccountsCollection($json);
+	}
+	
+	public function getAccountsInCommunity( $communityId, $query, $sort, $direction, $offset, $limit ) {
+		require_once EHIVE_API_ROOT_DIR.'/domain/accounts/AccountsCollection.php';
+		$path = VERSION_ID . "/communities/{$communityId}/accounts";
+		$queryString = DaoHelper::getAccountsQueryString($query, $sort, $direction, $offset, $limit);
+		$json = $this->transport->get( $path, $queryString, true );
+		return new AccountsCollection($json);
+	}	
 }?>

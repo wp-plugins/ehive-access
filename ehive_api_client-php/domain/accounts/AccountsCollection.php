@@ -12,45 +12,27 @@
 	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 	WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+require_once EHIVE_API_ROOT_DIR.'/domain/accounts/Account.php';
 
-require_once EHIVE_API_ROOT_DIR.'/domain/objectrecords/MediaSet.php';
+class AccountsCollection {
 
-class Community {
+	public $totalAccounts = 0;
+	public $maxSearchScore = 0;
+	public $accounts = array();
 	
-	public $communityId = 0;
-	public $name = "";
-	public $description = "";
-	public $searchScore = 0;
-	public $mediaSets = array();
-		
 	public function __construct($json = null){
 		if (isset($json)) {
-						
-			$this->communityId	= isset($json->communityId)	? $json->communityId	: 0;
-			$this->name			= isset($json->name)		? $json->name			: "";
-			$this->description	= isset($json->description)	? $json->description	: "";
-			$this->searchScore	= isset($json->searchScore)	? $json->searchScore	: 0;
-			
-			if (isset($json->mediaSets)) {
-				foreach ($json->mediaSets as $mediaSetJson) {
-					$mediaSet = new MediaSet($mediaSetJson);
-			
-					$this->mediaSets[$mediaSet->identifier] = $mediaSet;
+			$this->totalAccounts	= isset($json->totalAccounts)? $json->totalAccounts	: 0;
+			$this->maxSearchScore	= isset($json->maxSearchScore)	? $json->maxSearchScore		: 0;
+				
+			if (isset ($json->accounts)) {
+				$arrayOfAccounts = $json->accounts;			
+				foreach ($arrayOfAccounts as $accountsJson) {
+					$account = new Account($accountsJson);
+					$this->accounts[] = $account;
 				}
-			}				
-		}
-	}
-	
-	public function getMediaSetByIdentifier($mediaSetIdentifier) {
-	
-		if (isset($this->mediaSets)) {
-			if ( array_key_exists( $mediaSetIdentifier, $this->mediaSets )) {
-				return $this->mediaSets[ $mediaSetIdentifier ];
-			} else {
-				return null;
 			}
-			return null;
 		}
 	}
-		
-}?>
+}
+?>

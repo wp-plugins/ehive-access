@@ -96,17 +96,13 @@ class Transport {
 				return $cachedValue;
 			}			
 		}		
-		
-		
+				
 		$ch = curl_init();		
-
-		$qs = str_replace(" ", "%20", $queryString);
-		$qs = str_replace('"', "%22", $qs);
 		
 		$uri = $this->apiUrl . $path;
 		
-		$completeUrl = $this->createUrl($uri, $qs);
-				
+		$completeUrl = $this->createUrl( $uri, $queryString );
+						
 		$oauthCredentials = $this->getOauthCredentials();
 
 		curl_setopt($ch, CURLOPT_URL, $completeUrl);
@@ -141,6 +137,17 @@ class Transport {
 				}	
 				return $json;
 				break;
+				
+			case 400:
+				$json = json_decode($response);
+				curl_close ($ch);
+				
+				if (!is_null($this->memcachedServers) && $useCache === true) $this->memcache->close();
+						
+				require_once EHIVE_API_ROOT_DIR.'/exceptions/EHiveBadRequestException.php';
+						
+				throw new EHiveBadRequestException( $json );
+				break;				
 				
 			case 401:
 				curl_close ($ch);

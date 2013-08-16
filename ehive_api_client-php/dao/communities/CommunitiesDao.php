@@ -17,6 +17,7 @@ class CommunitiesDao {
 	private $transport;
 
 	public function __construct($trasport) {
+		require_once EHIVE_API_ROOT_DIR.'/dao/DaoHelper.php';
 		$this->transport = $trasport;
 	}
 
@@ -27,5 +28,13 @@ class CommunitiesDao {
 		$responseCommunitiesCollection = new CommunitiesCollection($json);
 		return $responseCommunitiesCollection;
 	}
-
+	
+	public function getCommunitiesInEHive( $query, $sort, $direction, $offset, $limit ) {
+		require_once EHIVE_API_ROOT_DIR.'/domain/communities/CommunitiesCollection.php';
+		$path = VERSION_ID . "/communities";
+		$queryString = DaoHelper::getCommunitiesQueryString($query, $sort, $direction, $offset, $limit);
+		$json = $this->transport->get( $path, $queryString, true );
+		return new CommunitiesCollection($json);
+	}
+	
 }?>

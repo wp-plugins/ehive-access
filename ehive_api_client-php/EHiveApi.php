@@ -71,6 +71,20 @@ class EHiveApi {
 		return $account;
 	}
 
+	public function getAccountsInEHive( $query, $sort, $direction, $offset=0, $limit=12 ) {
+		require_once EHIVE_API_ROOT_DIR.'/dao/accounts/AccountsDao.php';
+		$accountsDao = new AccountsDao($this->transport);
+		$accountsCollection = $accountsDao->getAccountsInEHive( $query, $sort, $direction, $offset, $limit );
+		return $accountsCollection;
+	}
+	
+	public function getAccountsInCommunity( $communityId, $query, $sort, $direction, $offset=0, $limit=12 ) {
+		require_once EHIVE_API_ROOT_DIR.'/dao/accounts/AccountsDao.php';
+		$accountsDao = new AccountsDao($this->transport);
+		$accountsCollection = $accountsDao->getAccountsInCommunity( $communityId, $query, $sort, $direction, $offset, $limit );
+		return $accountsCollection;
+	}
+	
 
 	//
 	//	Get Communities
@@ -82,7 +96,14 @@ class EHiveApi {
 		return $communitiesCollection;
 	}
 	
+	public function getCommunitiesInEHive( $query, $sort, $direction, $offset=0, $limit=12 ) {
+		require_once EHIVE_API_ROOT_DIR.'/dao/communities/CommunitiesDao.php';
+		$communitiesDao = new CommunitiesDao($this->transport);
+		$communitiesCollection = $communitiesDao->getCommunitiesInEHive( $query, $sort, $direction, $offset, $limit );
+		return $communitiesCollection;
+	}
 	
+		
 	//
 	//	Get ObjectRecords
 	//	

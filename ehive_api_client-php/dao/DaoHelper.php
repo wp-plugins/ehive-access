@@ -32,14 +32,114 @@ class DaoHelper {
 		}
 	}
 	
+	public static function getAccountsQueryString($query, $sort, $direction, $offset, $limit ) {
+	
+		$queryString = "";
+			
+		if ( !is_null($query) && strlen(trim($query)) > 0 ) {
+			$q = trim($query);
+			$q = rawurlencode( $q );
+			$queryString = "query=".$q;
+		}
+			
+		if (!is_null($sort)) {
+			$s = "sort={$sort}";
+			if(strlen($queryString) > 0) {
+				$queryString = $queryString."&".$s;
+			} else {
+				$queryString = $queryString.$s;
+			}
+		}
+	
+		if (!is_null($direction)) {
+			$d = "direction={$direction}";
+			if(strlen($queryString) > 0) {
+				$queryString = $queryString."&".$d;
+			} else {
+				$queryString = $queryString.$d;
+			}
+		}
+	
+		if (!is_null($offset)) {
+			$o = "offset={$offset}";
+			if(strlen($queryString) > 0) {
+				$queryString = $queryString."&".$o;
+			} else {
+				$queryString = $queryString.$o;
+			}
+		}
+	
+		if (!is_null($limit)) {
+			$l = "limit={$limit}";
+			if(strlen($queryString) > 0) {
+				$queryString = $queryString."&".$l;
+			} else {
+				$queryString = $queryString.$l;
+			}
+		}
+	
+		return $queryString;
+	}
+	
+	public static function getCommunitiesQueryString($query, $sort, $direction, $offset, $limit ) {
+	
+		$queryString = "";
+		
+		if ( !is_null($query) && strlen(trim($query)) > 0 ) {
+			$q = trim($query);
+			$q = rawurlencode( $q );
+			$queryString = "query=".$q;
+		}
+		
+		if (!is_null($sort)) {
+			$s = "sort={$sort}";
+			if(strlen($queryString) > 0) {
+				$queryString = $queryString."&".$s;
+			} else {
+				$queryString = $queryString.$s;
+			}
+		}
+	
+		if (!is_null($direction)) {
+			$d = "direction={$direction}";
+			if(strlen($queryString) > 0) {
+				$queryString = $queryString."&".$d;
+			} else {
+				$queryString = $queryString.$d;
+			}
+		}
+	
+		if (!is_null($offset)) {
+			$o = "offset={$offset}";
+			if(strlen($queryString) > 0) {
+				$queryString = $queryString."&".$o;
+			} else {
+				$queryString = $queryString.$o;
+			}
+		}
+	
+		if (!is_null($limit)) {
+			$l = "limit={$limit}";
+			if(strlen($queryString) > 0) {
+				$queryString = $queryString."&".$l;
+			} else {
+				$queryString = $queryString.$l;
+			}
+		}
+		
+		return $queryString;
+	}
+	
+	
 	public static function getObjectsQueryString($query, $hasImages, $sort, $direction, $offset, $limit, $content=null) {
 	
 		
 		$queryString = "";
-		
-	
-		if ( !is_null($query) && strlen(trim($query)) > 0 ) {
-			$queryString = "query=".trim($query);
+			
+		if ( !is_null($query) && strlen(trim($query)) > 0 ) {			
+			$q = trim($query);						
+			$q = rawurlencode( $q );			
+			$queryString = "query=".$q;
 		}
 	
 		if ( !is_null($hasImages) && $hasImages == true  ) {

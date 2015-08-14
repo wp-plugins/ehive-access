@@ -4,7 +4,7 @@
 	Plugin URI: http://developers.ehive.com/wordpress-plugins/
 	Description: Base authentication and API access for eHive Wordpress plugins.
 	Author: Vernon Systems limited
-	Version: 2.2.2
+	Version: 2.2.3
 	Author URI: http://vernonsystems.com
 	License: GPL2+
 */

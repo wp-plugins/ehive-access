@@ -337,7 +337,6 @@ class Transport {
 		}			
 		return $json;
 	}
-
 	
 	public function put($path, $content='') {
 	
@@ -460,10 +459,7 @@ class Transport {
 		}
 		return $json;
 	}
-	
-	
-	
-	
+		
 	public function delete($path, $queryString='') {
 
 		$ch = curl_init();
@@ -564,8 +560,8 @@ class Transport {
 	
 	private function getAuthenticated() {	
 				
-		$tokenEndpointUrl = $this->apiUrl . EHiveConstants::OAUTH_TOKEN_ENDPOINT_PATH;
-		$authorizaitonEndpointUrl = $this->apiUrl . EHiveConstants::OAUTH_AUTHORIZATION_ENDPOINT_PATH;
+		$tokenEndpointUrl = self::HTTPS_PROTOCOL.$this->apiUrl.EHiveConstants::OAUTH_TOKEN_ENDPOINT_PATH;
+		$authorizaitonEndpointUrl = self::HTTPS_PROTOCOL.$this->apiUrl.EHiveConstants::OAUTH_AUTHORIZATION_ENDPOINT_PATH;
 		
 		$ch = curl_init();
 
@@ -773,7 +769,6 @@ class Transport {
 	
 	private function mecacheKey($path, $queryString) {		
 		return md5( $path.$queryString );
-	}
-	
+	}	
 }
 ?>
